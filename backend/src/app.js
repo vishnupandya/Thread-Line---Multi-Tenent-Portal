@@ -17,9 +17,23 @@ const app = express();
 // --- Security & parsing middleware ---
 app.use(helmet());
 
+const configuredClient = env.CLIENT_URL ? env.CLIENT_URL.replace(/\/$/, '') : 'http://localhost:5173';
+
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (
+        cleanOrigin === configuredClient ||
+        cleanOrigin.endsWith('.vercel.app') ||
+        cleanOrigin.includes('localhost') ||
+        cleanOrigin.includes('127.0.0.1')
+      ) {
+        return callback(null, origin);
+      }
+      return callback(null, origin);
+    },
     credentials: true,
   })
 );

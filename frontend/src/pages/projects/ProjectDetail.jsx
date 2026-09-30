@@ -237,12 +237,24 @@ export default function ProjectDetail() {
                   col.tasks.map((task) => (
                     <div
                       key={task._id}
-                      className="bg-white rounded-lg border border-[#E5E9EF] hover:border-[#CBD5E1] p-3.5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between cursor-pointer group"
-                      onClick={() => setSelectedTask(task)}
+                      className={`bg-white rounded-lg border border-[#E5E9EF] p-3.5 shadow-2xs transition-all flex flex-col justify-between ${
+                        canManageTasks
+                          ? "hover:border-[#CBD5E1] hover:shadow-sm cursor-pointer group"
+                          : "cursor-default"
+                      }`}
+                      onClick={() => {
+                        if (canManageTasks) {
+                          setSelectedTask(task);
+                        }
+                      }}
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="text-xs font-semibold text-[#1A2433] group-hover:text-[#0047AB] transition-colors leading-snug">
+                          <h3
+                            className={`text-xs font-semibold text-[#1A2433] leading-snug ${
+                              canManageTasks ? "group-hover:text-[#0047AB] transition-colors" : ""
+                            }`}
+                          >
                             {task.title}
                           </h3>
                         </div>
@@ -339,17 +351,19 @@ export default function ProjectDetail() {
         />
       )}
 
-      {/* Task Drawer */}
-      <TaskDrawer
-        task={selectedTask}
-        isOpen={Boolean(selectedTask)}
-        onClose={() => setSelectedTask(null)}
-        members={members}
-        canManageTasks={canManageTasks}
-        canDelete={canManageTasks}
-        onUpdated={() => fetchProjectData()}
-        onDeleted={() => fetchProjectData()}
-      />
+      {/* Task Drawer (Owner and Admin only) */}
+      {canManageTasks && (
+        <TaskDrawer
+          task={selectedTask}
+          isOpen={Boolean(selectedTask)}
+          onClose={() => setSelectedTask(null)}
+          members={members}
+          canManageTasks={canManageTasks}
+          canDelete={canManageTasks}
+          onUpdated={() => fetchProjectData()}
+          onDeleted={() => fetchProjectData()}
+        />
+      )}
     </div>
   );
 }
