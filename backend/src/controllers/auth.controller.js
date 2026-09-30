@@ -86,26 +86,9 @@ export const login = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * Clears cookie and revokes active token version.
+ * Clears cookie session. Preserves multi-session compatibility for shared demo accounts.
  */
 export const logout = asyncHandler(async (req, res) => {
-  let token = req.cookies?.[env.COOKIE_NAME];
-  if (!token && req.headers.authorization?.startsWith('Bearer ')) {
-    token = req.headers.authorization.slice(7);
-  }
-
-  if (token) {
-    try {
-      const { verifyToken } = await import('../utils/jwt.js');
-      const payload = verifyToken(token);
-      if (payload?.sub) {
-        await User.findByIdAndUpdate(payload.sub, { $inc: { tokenVersion: 1 } });
-      }
-    } catch {
-      // ignore expired / invalid tokens
-    }
-  }
-
   res.clearCookie(env.COOKIE_NAME, {
     httpOnly: true,
     secure: env.IS_PROD,

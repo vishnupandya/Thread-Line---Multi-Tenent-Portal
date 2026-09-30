@@ -10,7 +10,10 @@ export const registerValidator = [
     .notEmpty()
     .withMessage('Name is required')
     .isLength({ min: 2, max: 80 })
-    .withMessage('Name must be between 2 and 80 characters'),
+    .withMessage('Name must be between 2 and 80 characters')
+    .matches(/^[^<>]+$/)
+    .withMessage('Name cannot contain HTML or script characters')
+    .escape(),
 
   body('email')
     .trim()

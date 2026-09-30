@@ -43,10 +43,11 @@ userSchema.methods.comparePassword = function (plain) {
   return bcrypt.compare(plain, this.passwordHash);
 };
 
-// --- Never expose passwordHash in JSON ---
+// --- Never expose passwordHash or internal tokenVersion in JSON ---
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.passwordHash;
+  delete obj.tokenVersion;
   delete obj.__v;
   return obj;
 };
