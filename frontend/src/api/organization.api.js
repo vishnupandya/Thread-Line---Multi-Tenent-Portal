@@ -7,6 +7,7 @@ export const organizationApi = {
   getMembers: (orgId) => api.get(`/organizations/${orgId}/members`),
   addMember: (orgId, data) => api.post(`/organizations/${orgId}/members`, data),
   removeMember: (orgId, userId) => api.delete(`/organizations/${orgId}/members/${userId}`),
+  delete: (orgId) => api.delete(`/organizations/${orgId}`),
 };
 
 export default organizationApi;

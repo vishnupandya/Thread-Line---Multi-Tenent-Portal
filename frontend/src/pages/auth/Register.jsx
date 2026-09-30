@@ -29,6 +29,11 @@ export default function Register() {
       return;
     }
 
+    if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+      setError("Password must contain at least one letter and at least one number.");
+      return;
+    }
+
     setError("");
     setLoading(true);
 
@@ -41,7 +46,12 @@ export default function Register() {
         setError(res.message || "Registration failed.");
       }
     } catch (err) {
-      setError(err.message || "Registration failed. Email might already exist.");
+      if (err.details && Array.isArray(err.details) && err.details.length > 0) {
+        const detailMessages = err.details.map((d) => d.message).join('. ');
+        setError(detailMessages);
+      } else {
+        setError(err.message || "Registration failed. Email might already exist.");
+      }
     } finally {
       setLoading(false);
     }
@@ -97,7 +107,7 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               leftIcon={Lock}
-              helperText="Must contain at least 8 characters."
+              helperText="At least 8 characters, with at least 1 letter and 1 number."
               required
             />
 

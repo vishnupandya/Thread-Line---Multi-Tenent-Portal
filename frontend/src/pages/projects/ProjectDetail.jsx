@@ -345,6 +345,7 @@ export default function ProjectDetail() {
         isOpen={Boolean(selectedTask)}
         onClose={() => setSelectedTask(null)}
         members={members}
+        canManageTasks={canManageTasks}
         canDelete={canManageTasks}
         onUpdated={() => fetchProjectData()}
         onDeleted={() => fetchProjectData()}

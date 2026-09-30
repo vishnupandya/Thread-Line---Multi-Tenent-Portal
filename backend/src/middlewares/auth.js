@@ -35,6 +35,11 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     throw ApiError.unauthorized('User no longer exists');
   }
 
+  // --- Check token revocation (logout invalidation) ---
+  if (payload.v !== undefined && payload.v !== (user.tokenVersion || 0)) {
+    throw ApiError.unauthorized('Session has been revoked. Please log in again.');
+  }
+
   // --- Attach to request for downstream use ---
   req.user = user;
   next();

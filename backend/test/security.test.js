@@ -10,13 +10,14 @@ import { toSlug } from '../src/utils/slug.js';
 describe('🔒 Security & RBAC Suite', () => {
   // --- 1. JWT Authentication Tests ---
   describe('JWT Token Verification', () => {
-    it('should generate a valid JWT and decode the user id correctly', () => {
+    it('should generate a valid JWT with tokenVersion and decode correctly', () => {
       const mockUserId = '65f1a2b3c4d5e6f7a8b9c0d1';
-      const token = signToken(mockUserId);
+      const token = signToken(mockUserId, 2);
 
       assert.ok(typeof token === 'string', 'Token must be a string');
       const decoded = verifyToken(token);
       assert.strictEqual(decoded.sub, mockUserId, 'Decoded subject must match user id');
+      assert.strictEqual(decoded.v, 2, 'Decoded version must match tokenVersion');
     });
 
     it('should reject a tampered JWT token', () => {
@@ -34,7 +35,7 @@ describe('🔒 Security & RBAC Suite', () => {
 
   // --- 2. Role-Based Access Control (RBAC) Tests ---
   describe('Role Authorization Guard', () => {
-    it('should allow OWNER or ADMIN to proceed', () => {
+    it('should allow OWNER or ADMIN to manage tasks & projects', () => {
       const middleware = requireRole(ROLES.OWNER, ROLES.ADMIN);
       let passed = false;
 
@@ -77,6 +78,28 @@ describe('🔒 Security & RBAC Suite', () => {
         memberError = err;
       });
       assert.strictEqual(memberError?.statusCode, 403, 'MEMBER fails atLeast ADMIN');
+    });
+
+    it('should restrict organization deletion to OWNER only', () => {
+      const ownerOnlyMiddleware = requireRole(ROLES.OWNER);
+
+      let ownerPassed = false;
+      ownerOnlyMiddleware({ membership: { role: ROLES.OWNER } }, {}, (err) => {
+        if (!err) ownerPassed = true;
+      });
+      assert.strictEqual(ownerPassed, true, 'OWNER should be allowed to delete org');
+
+      let adminError = null;
+      ownerOnlyMiddleware({ membership: { role: ROLES.ADMIN } }, {}, (err) => {
+        adminError = err;
+      });
+      assert.strictEqual(adminError?.statusCode, 403, 'ADMIN should be blocked with 403');
+
+      let memberError = null;
+      ownerOnlyMiddleware({ membership: { role: ROLES.MEMBER } }, {}, (err) => {
+        memberError = err;
+      });
+      assert.strictEqual(memberError?.statusCode, 403, 'MEMBER should be blocked with 403');
     });
 
     it('should fail if role check is executed without tenant guard', () => {

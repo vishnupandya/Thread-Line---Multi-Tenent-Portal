@@ -71,6 +71,7 @@ router.post(
   createTaskValidator,
   validate,
   requireProjectAccess,
+  requireRole(ROLES.OWNER, ROLES.ADMIN),
   createTask
 );
 

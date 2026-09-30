@@ -110,7 +110,7 @@ export default function Members() {
   };
 
   const roleOptions = [
-    { value: "MEMBER", label: "Member (Can create tasks & update own tasks)" },
+    { value: "MEMBER", label: "Member (View projects & update task status)" },
     { value: "ADMIN", label: "Admin (Full project & task management)" },
   ];
 

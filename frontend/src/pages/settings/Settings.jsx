@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+import organizationApi from "../../api/organization.api.js";
 import Button from "../../components/ui/Button.jsx";
+import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
 import { RoleBadge } from "../../components/ui/Badge.jsx";
 import {
   Building2,
@@ -11,12 +14,37 @@ import {
   Database,
   Lock,
   User,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function Settings() {
-  const { user, activeOrg, activeRole } = useAuth();
-  const { showSuccess } = useToast();
+  const { user, activeOrg, activeRole, refreshAuth } = useAuth();
+  const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteOrg = async () => {
+    if (!activeOrg?._id) return;
+    setDeleting(true);
+    try {
+      const res = await organizationApi.delete(activeOrg._id);
+      if (res.success) {
+        showSuccess(`Organization "${activeOrg.name}" deleted successfully.`);
+        setShowDeleteConfirm(false);
+        await refreshAuth();
+        navigate("/");
+      } else {
+        showError(res.message || "Failed to delete organization");
+      }
+    } catch (err) {
+      showError(err.message || "Failed to delete organization");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -156,6 +184,53 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Danger Zone: Delete Organization (OWNER ONLY) */}
+      {activeRole === "OWNER" && (
+        <div className="bg-white rounded-lg border border-rose-200 shadow-2xs overflow-hidden">
+          <div className="p-5 border-b border-rose-200 bg-rose-50/50">
+            <h2 className="text-sm font-semibold text-rose-800 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              Danger Zone
+            </h2>
+            <p className="text-xs text-rose-600 mt-0.5">
+              Irreversible destructive actions for this organization.
+            </p>
+          </div>
+
+          <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <strong className="text-xs font-semibold text-[#1A2433] block">
+                Delete "{activeOrg?.name}"
+              </strong>
+              <p className="text-xs text-[#6D8196] mt-1 max-w-lg">
+                Permanently delete this organization, including all projects, tasks, and team memberships. This action cannot be undone.
+              </p>
+            </div>
+
+            <Button
+              variant="danger"
+              size="sm"
+              icon={Trash2}
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Delete Organization
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Organization Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteOrg}
+        title="Delete Organization"
+        description={`Are you completely sure you want to delete "${activeOrg?.name}"? All associated projects, Kanban tasks, and memberships will be permanently deleted from the database.`}
+        confirmLabel="Yes, Delete Organization"
+        confirmVariant="danger"
+        loading={deleting}
+      />
     </div>
   );
 }

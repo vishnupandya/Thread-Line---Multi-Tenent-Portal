@@ -7,6 +7,7 @@ import {
   listMembers,
   addMember,
   removeMember,
+  deleteOrganization,
 } from '../controllers/organization.controller.js';
 
 // ← NEW: project controllers
@@ -47,6 +48,15 @@ router.get(
   validate,
   requireOrgMember('orgId'),
   getOrganization
+);
+
+router.delete(
+  '/:orgId',
+  orgIdParamValidator,
+  validate,
+  requireOrgMember('orgId'),
+  requireRole(ROLES.OWNER),
+  deleteOrganization
 );
 
 router.get(

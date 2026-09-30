@@ -16,6 +16,7 @@ export default function TaskDrawer({
   onUpdated,
   onDeleted,
   members = [],
+  canManageTasks = true,
   canDelete = true,
 }) {
   const [title, setTitle] = useState("");
@@ -43,24 +44,33 @@ export default function TaskDrawer({
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
-    if (!title.trim()) {
+    if (canManageTasks && !title.trim()) {
       showError("Task title cannot be empty");
       return;
     }
 
     setSaving(true);
     try {
-      const payload = {
-        title: title.trim(),
-        description: description.trim(),
-        status,
-        priority,
-        assigneeId: assigneeId || null,
-      };
+      // Members only send status update to comply with RBAC
+      const payload = canManageTasks
+        ? {
+            title: title.trim(),
+            description: description.trim(),
+            status,
+            priority,
+            assigneeId: assigneeId || null,
+          }
+        : {
+            status,
+          };
 
       const res = await taskApi.update(task._id, payload);
       if (res.success) {
-        showSuccess("Task updated successfully!");
+        showSuccess(
+          canManageTasks
+            ? "Task updated successfully!"
+            : "Task status updated successfully!"
+        );
         if (onUpdated) onUpdated(res.data.task);
         onClose();
       } else {
@@ -131,10 +141,17 @@ export default function TaskDrawer({
         subtitle={`Task ID: ${task._id}`}
       >
         <form onSubmit={handleSave} className="space-y-6">
+          {!canManageTasks && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+              <strong>Member View:</strong> You can update the status of this task. Task details and assignees can only be modified by Admins or Owners.
+            </div>
+          )}
+
           <Input
             label="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={!canManageTasks}
             required
           />
 
@@ -147,7 +164,8 @@ export default function TaskDrawer({
               placeholder="Task details and instructions..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-md border border-[#CBD5E1] p-3 text-sm text-[#1A2433] placeholder-[#9CA9B8] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#0047AB]/20 focus:border-[#0047AB]"
+              disabled={!canManageTasks}
+              className="w-full rounded-md border border-[#CBD5E1] p-3 text-sm text-[#1A2433] placeholder-[#9CA9B8] bg-white disabled:bg-slate-50 disabled:text-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0047AB]/20 focus:border-[#0047AB]"
             />
           </div>
 
@@ -163,6 +181,7 @@ export default function TaskDrawer({
               label="Priority"
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
+              disabled={!canManageTasks}
               options={priorityOptions}
             />
           </div>
@@ -171,6 +190,7 @@ export default function TaskDrawer({
             label="Assignee"
             value={assigneeId}
             onChange={(e) => setAssigneeId(e.target.value)}
+            disabled={!canManageTasks}
             options={assigneeOptions}
           />
 
@@ -221,7 +241,7 @@ export default function TaskDrawer({
                 icon={Save}
                 loading={saving}
               >
-                Save Changes
+                {canManageTasks ? "Save Changes" : "Update Status"}
               </Button>
             </div>
           </div>

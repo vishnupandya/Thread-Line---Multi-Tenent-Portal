@@ -9,9 +9,9 @@ import env from '../config/env.js';
  * @param {string} userId - MongoDB ObjectId as string
  * @returns {string} signed JWT
  */
-export function signToken(userId) {
+export function signToken(userId, tokenVersion = 0) {
   return jwt.sign(
-    { sub: userId },              // 'sub' = subject (standard JWT claim)
+    { sub: userId, v: tokenVersion }, // 'sub' = user id, 'v' = token version for invalidation
     env.JWT_SECRET,
     { expiresIn: env.JWT_EXPIRES_IN }
   );

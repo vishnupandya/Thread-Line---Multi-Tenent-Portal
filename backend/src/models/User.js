@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Password is required'],
       select: false, // by default queries won't return this
     },
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

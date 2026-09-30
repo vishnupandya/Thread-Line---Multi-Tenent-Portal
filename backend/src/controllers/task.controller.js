@@ -37,6 +37,10 @@ export const listTasks = asyncHandler(async (req, res) => {
  * Assignee must be a member of the same org as the project.
  */
 export const createTask = asyncHandler(async (req, res) => {
+  if (![ROLES.OWNER, ROLES.ADMIN].includes(req.membership.role)) {
+    throw ApiError.forbidden('Only owners and admins can create tasks');
+  }
+
   const {
     title,
     description = '',
@@ -103,25 +107,27 @@ export const getTask = asyncHandler(async (req, res) => {
  * Requires: authMiddleware + requireTaskAccess
  *
  * Permission rules:
- *   - OWNER / ADMIN  → can update any field
- *   - MEMBER         → can update if they are the assignee or the creator
+ *   - OWNER / ADMIN  → can update any field (title, description, status, priority, assigneeId)
+ *   - MEMBER         → can ONLY update task status (TODO -> IN_PROGRESS -> DONE)
  */
 export const updateTask = asyncHandler(async (req, res) => {
   const isPrivileged = [ROLES.OWNER, ROLES.ADMIN].includes(req.membership.role);
 
+  const { title, description, status, priority, assigneeId } = req.body;
+
   if (!isPrivileged) {
-    const isAssignee =
-      req.task.assigneeId?.toString() === req.user._id.toString();
-    const isCreator =
-      req.task.createdBy.toString() === req.user._id.toString();
-    if (!isAssignee && !isCreator) {
+    // Member cannot edit details, assignees, or priority
+    if (
+      title !== undefined ||
+      description !== undefined ||
+      priority !== undefined ||
+      assigneeId !== undefined
+    ) {
       throw ApiError.forbidden(
-        'Members can only update tasks they created or are assigned'
+        'Members are only permitted to update task status'
       );
     }
   }
-
-  const { title, description, status, priority, assigneeId } = req.body;
 
   // --- Validate new assignee (if provided and not null) ---
   if (assigneeId !== undefined && assigneeId !== null) {

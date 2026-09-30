@@ -42,7 +42,7 @@ export const register = asyncHandler(async (req, res) => {
     passwordHash: password, // will be hashed by pre-save hook
   });
 
-  const token = signToken(user._id.toString());
+  const token = signToken(user._id.toString(), user.tokenVersion || 0);
   setAuthCookie(res, token);
 
   res.status(201).json({
@@ -73,7 +73,7 @@ export const login = asyncHandler(async (req, res) => {
     throw ApiError.unauthorized('Invalid credentials');
   }
 
-  const token = signToken(user._id.toString());
+  const token = signToken(user._id.toString(), user.tokenVersion || 0);
   setAuthCookie(res, token);
 
   res.json({
@@ -86,9 +86,26 @@ export const login = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * Clears cookie. Idempotent — safe to call even if not logged in.
+ * Clears cookie and revokes active token version.
  */
 export const logout = asyncHandler(async (req, res) => {
+  let token = req.cookies?.[env.COOKIE_NAME];
+  if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+    token = req.headers.authorization.slice(7);
+  }
+
+  if (token) {
+    try {
+      const { verifyToken } = await import('../utils/jwt.js');
+      const payload = verifyToken(token);
+      if (payload?.sub) {
+        await User.findByIdAndUpdate(payload.sub, { $inc: { tokenVersion: 1 } });
+      }
+    } catch {
+      // ignore expired / invalid tokens
+    }
+  }
+
   res.clearCookie(env.COOKIE_NAME, {
     httpOnly: true,
     secure: env.IS_PROD,
@@ -98,7 +115,7 @@ export const logout = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    data: { message: 'Logged out' },
+    data: { message: 'Logged out successfully' },
   });
 });
 

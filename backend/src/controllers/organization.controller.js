@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import Organization from '../models/Organization.js';
 import Membership from '../models/Membership.js';
 import User from '../models/User.js';
+import Project from '../models/Project.js';
+import Task from '../models/Task.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { generateUniqueSlug } from '../utils/slug.js';
@@ -187,5 +189,35 @@ export const removeMember = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: { message: 'Member removed' },
+  });
+});
+
+/**
+ * DELETE /api/organizations/:orgId
+ * Delete organization and cascade delete its memberships, projects, and tasks.
+ * Strict: OWNER only.
+ */
+export const deleteOrganization = asyncHandler(async (req, res) => {
+  if (req.membership.role !== ROLES.OWNER) {
+    throw ApiError.forbidden('Only the organization owner can delete this organization');
+  }
+
+  const orgId = req.orgId;
+
+  // Find all projects belonging to this org
+  const projects = await Project.find({ orgId }).select('_id');
+  const projectIds = projects.map((p) => p._id);
+
+  // Cascade delete tasks, projects, memberships, and the organization
+  await Promise.all([
+    Task.deleteMany({ projectId: { $in: projectIds } }),
+    Project.deleteMany({ orgId }),
+    Membership.deleteMany({ orgId }),
+    Organization.findByIdAndDelete(orgId),
+  ]);
+
+  res.json({
+    success: true,
+    data: { message: 'Organization and associated resources deleted successfully' },
   });
 });
