@@ -11,7 +11,7 @@ import { useToast } from "../../context/ToastContext.jsx";
 
 export default function AppLayout() {
   const { user, organizations, logout, refreshAuth } = useAuth();
-  const { showSuccess, showInfo } = useToast();
+  const { showInfo } = useToast();
   const [showCreateOrg, setShowCreateOrg] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [checkingInvite, setCheckingInvite] = useState(false);

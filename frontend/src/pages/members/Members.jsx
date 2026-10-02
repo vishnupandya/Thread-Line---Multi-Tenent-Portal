@@ -11,7 +11,7 @@ import Avatar from "../../components/ui/Avatar.jsx";
 import { RoleBadge } from "../../components/ui/Badge.jsx";
 import { TableSkeleton } from "../../components/ui/Skeleton.jsx";
 import ErrorState from "../../components/ui/ErrorState.jsx";
-import { Users, UserPlus, Trash2, Mail, Shield } from "lucide-react";
+import { UserPlus, Trash2, Mail } from "lucide-react";
 
 export default function Members() {
   const { user: currentUser, activeOrg, activeRole } = useAuth();

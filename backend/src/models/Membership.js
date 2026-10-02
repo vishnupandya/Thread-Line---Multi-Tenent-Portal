@@ -26,9 +26,8 @@ const membershipSchema = new mongoose.Schema(
 // --- CRITICAL: one user can be member of an org ONLY ONCE ---
 membershipSchema.index({ userId: 1, orgId: 1 }, { unique: true });
 
-// --- Query helpers: fast lookups by each field ---
+// --- Query helpers: fast lookups by org ---
 membershipSchema.index({ orgId: 1 });
-membershipSchema.index({ userId: 1 });
 
 membershipSchema.methods.toJSON = function () {
   const obj = this.toObject();

@@ -1,5 +1,5 @@
 import Project from '../models/Project.js';
-import ApiError from '../utils/ApiError.js';
+import Task from '../models/Task.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 /**
@@ -81,15 +81,16 @@ export const updateProject = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/projects/:projectId
  * Requires: authMiddleware + requireProjectAccess + requireRole(OWNER, ADMIN)
- *
- * NOTE: Tasks of this project are NOT auto-deleted here.
- * We will add cascade cleanup in Phase 7 when the Task model is in scope.
+ * Cascade deletes all tasks of this project.
  */
 export const deleteProject = asyncHandler(async (req, res) => {
-  await req.project.deleteOne();
+  await Promise.all([
+    Task.deleteMany({ projectId: req.project._id }),
+    req.project.deleteOne(),
+  ]);
 
   res.json({
     success: true,
-    data: { message: 'Project deleted' },
+    data: { message: 'Project and associated tasks deleted successfully' },
   });
 });

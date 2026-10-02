@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, Plus, Building2 } from "lucide-react";
+import { ChevronDown, Check, Plus } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import CreateOrgModal from "./CreateOrgModal.jsx";
 import { RoleBadge } from "../ui/Badge.jsx";

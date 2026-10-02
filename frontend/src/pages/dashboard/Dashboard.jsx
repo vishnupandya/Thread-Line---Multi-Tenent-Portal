@@ -12,7 +12,6 @@ import { StatusBadge, PriorityBadge } from "../../components/ui/Badge.jsx";
 import CreateProjectModal from "../projects/CreateProjectModal.jsx";
 import {
   FolderKanban,
-  CheckCircle2,
   Clock,
   ListTodo,
   Plus,

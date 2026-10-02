@@ -4,7 +4,6 @@ import Input from "../../components/ui/Input.jsx";
 import Select from "../../components/ui/Select.jsx";
 import Button from "../../components/ui/Button.jsx";
 import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
-import Avatar from "../../components/ui/Avatar.jsx";
 import taskApi from "../../api/task.api.js";
 import { useToast } from "../../context/ToastContext.jsx";
 import { Trash2, Calendar, User, Save } from "lucide-react";

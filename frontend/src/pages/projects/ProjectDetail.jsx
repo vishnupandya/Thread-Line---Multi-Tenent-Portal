@@ -9,7 +9,6 @@ import Button from "../../components/ui/Button.jsx";
 import Input from "../../components/ui/Input.jsx";
 import { CardSkeleton } from "../../components/ui/Skeleton.jsx";
 import ErrorState from "../../components/ui/ErrorState.jsx";
-import EmptyState from "../../components/ui/EmptyState.jsx";
 import Avatar from "../../components/ui/Avatar.jsx";
 import { PriorityBadge } from "../../components/ui/Badge.jsx";
 import CreateTaskModal from "./CreateTaskModal.jsx";

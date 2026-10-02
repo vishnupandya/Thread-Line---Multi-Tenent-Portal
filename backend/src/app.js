@@ -51,13 +51,7 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok', uptime: process.uptime() } });
 });
 
-// --- Feature routes (added phase by phase) ---
-// import authRoutes from './routes/auth.routes.js';
-// app.use('/api/auth', authRoutes);
-
-// ✅ Sahi tarika:
-
-// --- Feature routes (Pehle aane chahiye) ---
+// --- Feature routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/projects', projectRoutes);

@@ -34,7 +34,3 @@ export const updateProjectValidator = [
 export const projectIdParamValidator = [
   param('projectId').isMongoId().withMessage('Invalid project id'),
 ];
-
-export const orgIdParamValidator = [
-  param('orgId').isMongoId().withMessage('Invalid organization id'),
-];

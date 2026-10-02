@@ -12,7 +12,6 @@ import EmptyState from "../../components/ui/EmptyState.jsx";
 import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
 import CreateProjectModal from "./CreateProjectModal.jsx";
 import EditProjectModal from "./EditProjectModal.jsx";
-import Avatar from "../../components/ui/Avatar.jsx";
 import {
   FolderKanban,
   Plus,

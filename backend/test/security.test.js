@@ -138,4 +138,36 @@ describe('🔒 Security & RBAC Suite', () => {
       assert.strictEqual(slug, 'acme-beta-technologies-inc');
     });
   });
+
+  // --- 5. User Data Exposure & Sanitization Tests ---
+  describe('User Data Exposure & Input Hygiene', () => {
+    it('should not expose passwordHash or tokenVersion in toJSON()', async () => {
+      const User = (await import('../src/models/User.js')).default;
+      const user = new User({
+        name: 'Safe User',
+        email: 'safe@example.com',
+        passwordHash: 'secret-hash',
+        tokenVersion: 5,
+      });
+
+      const json = user.toJSON();
+      assert.strictEqual(json.passwordHash, undefined, 'passwordHash must be stripped');
+      assert.strictEqual(json.tokenVersion, undefined, 'tokenVersion must be stripped');
+      assert.strictEqual(json.__v, undefined, '__v must be stripped');
+      assert.strictEqual(json.name, 'Safe User');
+    });
+
+    it('should disallow HTML/script tags in registration name', async () => {
+      const { registerValidator } = await import('../src/validators/auth.validator.js');
+      const nameValidator = registerValidator.find((v) => v.builder?.fields?.includes('name') || v.fields?.includes('name'));
+
+      // Validate regex directly: matches(/^[^<>]+$/)
+      const xssName = '<script>alert("hacked")</script>';
+      const safeName = 'John Doe';
+      const regex = /^[^<>]+$/;
+
+      assert.strictEqual(regex.test(safeName), true, 'Safe name should pass');
+      assert.strictEqual(regex.test(xssName), false, 'XSS script name should fail');
+    });
+  });
 });

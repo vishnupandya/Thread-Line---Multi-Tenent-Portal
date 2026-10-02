@@ -1,6 +1,5 @@
 import User from '../models/User.js';
 import Membership from '../models/Membership.js';
-import Organization from '../models/Organization.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { signToken } from '../utils/jwt.js';
